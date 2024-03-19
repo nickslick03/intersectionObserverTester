@@ -51,6 +51,8 @@ function Result(props: {
             setIsHalfway(isHalfway)
     }
 
+    const marginIndex2 = createMemo(() => props.getMargins().length == 2 ? 1 : 0)
+
     return (
         <div>
             <h2 class="font-mono font-bold">
@@ -70,7 +72,7 @@ function Result(props: {
                     }}>
                     <div 
                         class="bg-purple-400 bg-opacity-20" 
-                        style={`${getIsHalfway() ? '' : 'display: none;'} 
+                        style={`${getIsHalfway() && props.getMargins()[0].margin < 0  ? '' : 'display: none;'} 
                         height: ${props.getMargins()[0].unit == 'px' 
                         ? -props.getMargins()[0].margin 
                         : (-props.getMargins()[0].margin) * 5}px;`}>
@@ -95,10 +97,10 @@ function Result(props: {
                     </div>
                     <div 
                     class="bg-purple-400 bg-opacity-20" 
-                    style={`${getIsHalfway() ? 'display: none;' : ''} 
-                    height: ${props.getMargins()[0].unit == 'px' 
-                        ? -props.getMargins()[0].margin 
-                        : (-props.getMargins()[0].margin) * 5}px;`}>
+                    style={`${!getIsHalfway() && props.getMargins()[marginIndex2()].margin < 0 ? '' : 'display: none;'} 
+                    height: ${props.getMargins()[marginIndex2()].unit == 'px' 
+                        ? -props.getMargins()[marginIndex2()].margin 
+                        : (-props.getMargins()[marginIndex2()].margin) * 5}px;`}>
                     </div>
                 </div>
                 <div 

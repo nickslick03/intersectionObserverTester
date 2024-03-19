@@ -12,7 +12,7 @@ function App() {
 
   return (
     <>
-      <h1 class="text-3xl font-bold text-center my-4 font-mono">
+      <h1 class="text-3xl font-bold text-center my-6 font-mono">
         Intersection Observer Tester
       </h1>
       <Observer getThreshold={getThreshold} getMargins={getMargins}/>

@@ -38,7 +38,7 @@ function Observer(props: {
     return (
         <div class="flex justify-center my-4">
             <code 
-                class="whitespace-pre mb-5 w-min bg-gray-200 p-3 rounded-md" 
+                class="whitespace-pre mb-4 w-min bg-gray-200 p-3 rounded-md" 
                 innerHTML={code().value}>
             </code>
         </div>
