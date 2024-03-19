@@ -1,6 +1,6 @@
 import { Accessor, Setter, Signal } from "solid-js"
 
-function formatSignal(str: string) {
+function formatThresholds(str: string) {
     const strList = str.trim().split(' ')
     const thresholds: number[] = []
     for (let numStr of strList) {
@@ -17,10 +17,10 @@ function ThresholdsInput(props: {
 }) {
 
     const updateThreshold = (str: string) => 
-        props.setThreshold(formatSignal(str))
+        props.setThreshold(formatThresholds(str))
 
     return (
-        <div class="w-[200px]">
+        <div class="w-[250px]">
             <h2 class="font-bold font-mono">
                 Thresholds
             </h2>
@@ -29,7 +29,7 @@ function ThresholdsInput(props: {
                 id="thresholds"
                 rows="5"
                 class="w-full border resize-none border-black outline-none"
-                placeholder={`Enter values from 0 to 1 seperated by spaces\n(e.g. 0 0.4 1).`}
+                placeholder={`Enter values from 0 to 1 seperated by spaces (e.g. 0 0.4 1).`}
                 onChange={(e) => updateThreshold(e.target.value)}
                 value={props.getThreshold().toString().replace(/,/g, " ")}>
             </textarea>

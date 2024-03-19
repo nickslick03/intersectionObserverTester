@@ -1,58 +1,96 @@
-import { For, createSignal } from "solid-js"
+import { Accessor, For, Setter, createMemo } from "solid-js"
+import { MarginType } from "./types"
 
-const MARGIN1 = ["margin"]
-const MARGIN2 = ["margin y", "margin x"]
-const MARGIN3 = ["margin top", "margin x", "margin bottom"]
-const MARGIN4 = ["margin top", "margin right", "margin bottom", "margin left"]
-const MARGIN_LABELS = [MARGIN1]
+const MARGIN_LABELS = [
+    ['margin-y'],
+    ['margin-top', 'margin-bottom']
+]
 
-function MarginInput() {
+function MarginInput(props: {
+    getMargins: Accessor<MarginType[]>,
+    setMargins: Setter<MarginType[]>
+}) {
 
-    const [ getMarginIndex, setMarginIndex ] = createSignal(0)
+    const marginIndex = createMemo(() => props.getMargins().length - 1)
 
-    const incrMarginIndex = () => getMarginIndex() < 3 ? setMarginIndex(index => index + 1) : null
-    const decrMarginIndex = () => getMarginIndex() > 0 ? setMarginIndex(index => index - 1) : null
+    const incrMarginIndex = () => {
+        if (marginIndex() < 1)
+            props.setMargins(margins => [...margins, {margin: 0, unit: 'px'}])
+    }
+    const decrMarginIndex = () => {
+        if (marginIndex() > 0)
+            props.setMargins(margins => margins.slice(0, marginIndex()))
+    }
+    
+    const updateMargin = (marginStr: string, index: number) => {
+        const margin = +marginStr
+        if (isNaN(margin)) return
+        const newMargins = [...props.getMargins()]
+        newMargins[index].margin = margin
+        props.setMargins(newMargins);
+    }
+    
+    const updateUnit = (unit: string, index: number) => {
+        if (unit != 'px' && unit != '%') return
+        const newMargins = [...props.getMargins()]
+        newMargins[index].unit = unit
+        props.setMargins(newMargins)
+    }
 
     return (
         <div>
             <h2 class="font-bold font-mono">
                 rootMargin
             </h2>
-            <div style="height: 100px; width: 200px;">
-                <For each={MARGIN_LABELS[getMarginIndex()]}>{(label, i) =>
-                    <div>
-                        <label for={"margin-"+i()} style={{
-                                "display": "flex",
-                                "justify-content": "flex-end"
-                            }}>
-                            <div style={{
-                                    "flex": "1"
-                                }}>
-                                {label}:&nbsp;
+            <div class="h-[100px] w-[250px]">
+                <div class="flex flex-col gap-2">
+                    <For each={MARGIN_LABELS[marginIndex()]}>{(label, i) =>
+                        <label for={label} class="flex justify-end">
+                            <div class="flex-1">
+                                {label}:
                             </div>
                             <div class="border border-black font-mono">
-                                <input type="number" id={"margin-"+i()} class="w-10 outline-none" />
-                                <select name="margin-unit" id={"margin-unit-"+i()} class="outline-none">
-                                    <option value="px">px</option>
-                                    <option value="%">%</option>
+                                <input 
+                                    type="number"
+                                    id={label}
+                                    class="w-14 outline-none"
+                                    value={props.getMargins()[i()].margin}
+                                    onchange={(e) => updateMargin(e.target.value, i())} />
+                                <select 
+                                    name={label + "-unit"}
+                                    id={label + "-unit"} 
+                                    class="outline-none"
+                                    onchange={(e) => updateUnit(e.target.value, i())}>
+                                    <option 
+                                        value="px" 
+                                        selected={props.getMargins()[i()].unit == "px" || undefined}>
+                                        px
+                                    </option>
+                                    <option 
+                                        value="%"
+                                        selected={props.getMargins()[i()].unit == "%" || undefined}>
+                                        %
+                                    </option>
                                 </select>    
                             </div>
                         </label>    
+                    }</For>
+                    <div class="text-center">
+                        <button 
+                            disabled={marginIndex() == MARGIN_LABELS.length - 1}
+                            onclick={incrMarginIndex}
+                            class="px-2 mr-1 border border-black disabled:border-gray-300 disabled:text-gray-300">
+                            +
+                        </button>
+                        <button
+                            disabled={marginIndex() == 0}
+                            onclick={decrMarginIndex}
+                            class="px-2 border border-black disabled:border-gray-300 disabled:text-gray-300">
+                            -
+                        </button>
                     </div>
-                }</For>
+                </div>
             </div>
-{/* {            <div style="text-align: center;">
-            <button 
-                disabled={getMarginIndex() == MARGIN_LABELS.length - 1}
-                onclick={incrMarginIndex}>
-                +
-            </button>
-            <button
-                disabled={getMarginIndex() == 0}
-                onclick={decrMarginIndex}>
-                -
-            </button>
-        </div>} */}
         </div>
     )
 }
