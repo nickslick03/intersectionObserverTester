@@ -84,9 +84,9 @@ function Result(props: {
         const mt = props.getMargins()[0].margin
         const mb = props.getMargins()[currMarginIndex()].margin
         if (mb < 0 && !getIsHalfway())
-            if (mt > 0)
-                return Math.abs(bottomMargin()) * 2
-            else
+            // if (mt > 0)
+            //     return Math.abs(bottomMargin()) * 2
+            // else
                 return Math.abs(bottomMargin())
         else if (mt > 0 && getIsHalfway())
             return Math.abs(topMargin())
@@ -108,8 +108,8 @@ function Result(props: {
                     id="thresholds-container" 
                     class="w-[500px] min-h-[500px] z-10 pointer-events-none absolute"
                     classList={{
-                        'bottom-0': xor(!getIsHalfway(), topMargin() > 0),
-                        'top-0': xor(getIsHalfway(), bottomMargin() > 0)
+                        'bottom-0': !getIsHalfway() && bottomMargin() < 0 || getIsHalfway() && topMargin() > 0,
+                        'top-0': !getIsHalfway() && bottomMargin() > 0 || getIsHalfway() && topMargin() < 0,
                     }}>
                     <div 
                         class="bg-purple-400 bg-opacity-20"
