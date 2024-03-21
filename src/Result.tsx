@@ -1,11 +1,22 @@
 import { Accessor, For, createEffect, createMemo, createSignal, untrack } from "solid-js"
+import { MarginType } from "./types"
 
-function Result(props: {
-    getThreshold: Accessor<number[]>
+const isGray = (threshold: number, mb: number) => (threshold * 500) - mb > 500
+
+function Result({ 
+    getThreshold,
+    getMargins, 
+}: {
+    getThreshold: Accessor<number[]>,
+    getMargins: Accessor<MarginType[]>
 }) {
 
     const [getObserver, setObserver] = createSignal<IntersectionObserver>()
-    const [getIsHalfway, setIsHalfway] = createSignal(false);
+    const [getIsHalfway, setIsHalfway] = createSignal(false)
+
+    const marginStr = createMemo(() => 
+        `${getMargins()[0].margin}${getMargins()[0].unit} 0px
+        ${getMargins().length == 2 ? `${getMargins()[1].margin}${getMargins()[1].unit} 0px` : ''}`)
 
     createEffect(() => {
         if (untrack(getObserver) !== undefined)
@@ -13,12 +24,15 @@ function Result(props: {
 
         const observer = new IntersectionObserver(
             (e) => {
-                console.log(Math.round((e[0].intersectionRatio) * 100) + "%")
-            },
+                const percent = Math.round(e[0].intersectionRatio * 100) + "%"
+                const isTop = e[0].boundingClientRect.top < e[0].rootBounds!.top
+                const isIntersecting = e[0].isIntersecting
+                console.log({percent, isTop, isIntersecting, entry: e[0]})
+            },        
             {
-                threshold: props.getThreshold(),
+                threshold: getThreshold(),
                 root: document.getElementById("root-container"),
-                rootMargin: "0px",
+                rootMargin: marginStr(),
             }
         );
 
@@ -27,9 +41,9 @@ function Result(props: {
     })
 
     const thresholds = createMemo(() => 
-        props.getThreshold().length == 0
+        getThreshold().length == 0
         ? [0]
-        : props.getThreshold())
+        : getThreshold())
 
     const scrollDistance = (scrollTop: number, scrollHeight: number, clientHeight: number) => {
         const height = scrollHeight - clientHeight
@@ -39,6 +53,28 @@ function Result(props: {
             setIsHalfway(isHalfway)
     }
 
+    const lastIndex = createMemo(() => getMargins().length - 1)
+
+    const mb = createMemo(() => getMargins()[lastIndex()].margin)
+    const mt = createMemo(() => getMargins()[0].margin)
+
+    const bottomPositiveHeight = createMemo(() => {
+        console.log(mb())
+        if (mb() > 0)
+            return getMargins()[0].unit == 'px'
+            ? mb()
+            : mb() * 5
+        return 0
+    })
+
+    const bottomNegativeHeight = createMemo(() => {
+        if (mb() < 0)
+            return getMargins()[lastIndex()].unit == 'px'
+            ? -mb()
+            : (-mb()) * 5
+        return 0            
+    })
+
     return (
         <div>
             <h2 class="font-mono font-bold">
@@ -47,29 +83,53 @@ function Result(props: {
             <div 
                 id="result-container"
                 class=" self-center w-[500px] h-[500px] relative flex items-center">
-                <div class="w-[500px] h-[500px] z-10 pointer-events-none">
-                    <For each={thresholds()}>{(t, i) => 
-                        <>
-                            <div 
-                                class="absolute w-full border border-dashed border-blue-600" 
-                                style={`bottom: ${t*100}%; ${getIsHalfway() ? 'display: none' : ''};`}>
+                <div 
+                    id="thresholds-container" 
+                    class="w-[500px] h-[500px] z-10 pointer-events-none relative">
+                    <div
+                        id="bottom-thresholds"
+                        class="absolute w-full min-h-full" 
+                        classList={{
+                            "top-[500px]": getIsHalfway()
+                        }}>
+                        <div class="w-full absolute" classList={{
+                            "bottom-0": mb() < 0
+                        }}>
+                            <div id="bottom-positive-margin" class="w-full bg-pink-400 bg-opacity-20" style={`height: ${bottomPositiveHeight()}px`}></div>
+                            <div class="w-full h-[500px] relative">
+                                <For each={thresholds()}>{(t, i) => 
+                                    <div 
+                                        class="absolute w-full border border-dashed border-blue-600" 
+                                        style={`bottom: ${t*100}%;`}>
+                                        <div 
+                                            class="absolute font-mono"
+                                            style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
+                                            {t}
+                                        </div>
+                                    </div>
+                                }</For>    
+                            </div>
+                            <div id="bottom-negative-margin" class="w-full bg-purple-400 bg-opacity-20" style={`height: ${bottomNegativeHeight()}px`}></div>    
+                        </div>
+                    </div>
+                    <div
+                        id="top-thresholds"
+                        class="absolute w-full min-h-full" 
+                        classList={{
+                            "bottom-[500px]": !getIsHalfway()
+                        }}>
+                        <For each={thresholds()}>{(t, i) => 
+                                <div 
+                                    class="absolute w-full border border-dashed border-red-600" 
+                                    style={`top: ${t*100}%;`}>
                                 <div 
                                     class="absolute font-mono"
                                     style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
                                     {t}
                                 </div>
                             </div>
-                            <div 
-                                class="absolute w-full border border-dashed border-red-600" 
-                                style={`top: ${t*100}%; ${!getIsHalfway() ? 'display: none' : 's'};`}>
-                            <div 
-                                class="absolute font-mono"
-                                style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
-                                {t}
-                            </div>
-                        </div>
-                        </>}
-                    </For>
+                        }</For>
+                    </div>
                 </div>
                 <div 
                     id="root-container" 
