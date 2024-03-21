@@ -11,7 +11,7 @@ function Result(props: {
     const [getObserver, setObserver] = createSignal<IntersectionObserver>()
     const [getIsHalfway, setIsHalfway] = createSignal(false)
 
-    const margins = createMemo(() => 
+    const marginStr = createMemo(() => 
     props.getMargins().length == 1
     ? `${props.getMargins()[0].margin + props.getMargins()[0].unit} 0px`
     : `${props.getMargins()[0].margin + props.getMargins()[0].unit} 0px ${props.getMargins()[1].margin + props.getMargins()[1].unit} 0px`)
@@ -30,7 +30,7 @@ function Result(props: {
             {
                 threshold: props.getThreshold(),
                 root: document.getElementById("root-container"),
-                rootMargin: margins(),
+                rootMargin: marginStr(),
             }
         );
 
@@ -51,7 +51,48 @@ function Result(props: {
             setIsHalfway(isHalfway)
     }
 
-    const marginIndex2 = createMemo(() => props.getMargins().length == 2 ? 1 : 0)
+    const currMarginIndex = createMemo(() => props.getMargins().length == 2 && !getIsHalfway() ? 1 : 0)
+
+    const topMargin = createMemo(() => {
+        const mt = props.getMargins()[0].margin
+        const unitT = props.getMargins()[0].unit        
+        return unitT == 'px' 
+        ? mt 
+        : mt * 5
+    })
+
+    const bottomMargin = createMemo(() => {
+        const mb = props.getMargins()[currMarginIndex()].margin
+        const unitB = props.getMargins()[currMarginIndex()].unit
+        return unitB == 'px'
+        ? mb
+        : mb * 5
+    })
+
+    const topMarginBlock = createMemo(() => {
+        const mt = props.getMargins()[0].margin
+        const mb = props.getMargins()[currMarginIndex()].margin
+        if (mt < 0 && getIsHalfway())
+            return Math.abs(topMargin())
+        else if (mb > 0 && !getIsHalfway())
+            return Math.abs(bottomMargin())
+        else
+            return 0
+    })
+
+    const bottomMarginBlock = createMemo(() => {
+        const mt = props.getMargins()[0].margin
+        const mb = props.getMargins()[currMarginIndex()].margin
+        if (mb < 0 && !getIsHalfway())
+            if (mt > 0)
+                return Math.abs(bottomMargin()) * 2
+            else
+                return Math.abs(bottomMargin())
+        else if (mt > 0 && getIsHalfway())
+            return Math.abs(topMargin())
+        else
+            return 0
+    })
 
     return (
         <div>
@@ -62,20 +103,17 @@ function Result(props: {
                 id="result-container"
                 class="self-center w-[500px] h-[500px] relative flex items-center 
                 outline outline-black outline-1
-                overflow-x-visible overflow-y-clip">
+                overflow-x-visible">
                 <div
                     id="thresholds-container" 
                     class="w-[500px] min-h-[500px] z-10 pointer-events-none absolute"
                     classList={{
-                        'bottom-0': !getIsHalfway(),
-                        'top-0': getIsHalfway()
+                        'bottom-0': xor(!getIsHalfway(), topMargin() > 0),
+                        'top-0': xor(getIsHalfway(), bottomMargin() > 0)
                     }}>
                     <div 
-                        class="bg-purple-400 bg-opacity-20" 
-                        style={`${getIsHalfway() && props.getMargins()[0].margin < 0  ? '' : 'display: none;'} 
-                        height: ${props.getMargins()[0].unit == 'px' 
-                        ? -props.getMargins()[0].margin 
-                        : (-props.getMargins()[0].margin) * 5}px;`}>
+                        class="bg-purple-400 bg-opacity-20"
+                        style={`height: ${topMarginBlock()}px`}>
                     </div>
                     <div class="h-[500px] w-[500px] relative">
                         <For each={thresholds()}>{(t, i) => 
@@ -83,10 +121,13 @@ function Result(props: {
                                 class="absolute w-[500px] border border-dashed"
                                 classList={{
                                     "border-blue-500": !getIsHalfway(),
-                                    "border-red-500": getIsHalfway()
+                                    "border-red-500": getIsHalfway(),
+                                    "translate-y-1/2": !getIsHalfway(),
+                                    "-translate-y-1/2": getIsHalfway()
                                 }}
                                 style={`${getIsHalfway() ? 'top' : 'bottom'}: ${t * 100}%;`}>
                                 <div 
+                                    id="negative-margin-bottom"
                                     class="absolute font-mono"
                                     style={`${i() % 2 == 0 ? "right" : "left"}: 0; 
                                     transform: translate(${i() % 2 == 0 ? '' : '-'}130%, -${xor(t < .5, getIsHalfway()) ? '80' : '20'}%);`}>
@@ -96,11 +137,8 @@ function Result(props: {
                         }</For>
                     </div>
                     <div 
-                    class="bg-purple-400 bg-opacity-20" 
-                    style={`${!getIsHalfway() && props.getMargins()[marginIndex2()].margin < 0 ? '' : 'display: none;'} 
-                    height: ${props.getMargins()[marginIndex2()].unit == 'px' 
-                        ? -props.getMargins()[marginIndex2()].margin 
-                        : (-props.getMargins()[marginIndex2()].margin) * 5}px;`}>
+                        class="bg-purple-400 bg-opacity-20"
+                        style={`height: ${bottomMarginBlock()}px`}>
                     </div>
                 </div>
                 <div 
