@@ -4,6 +4,7 @@ import Observer from "./Observer"
 import Result from "./Result"
 import ThresholdsInput from "./ThresholdsInput"
 import { MarginType } from "./types"
+import Key from "./Key"
 
 function App() {
 
@@ -17,9 +18,10 @@ function App() {
       </h1>
       <Observer getThreshold={getThreshold} getMargins={getMargins}/>
       <div class="flex gap-20 justify-center flex-wrap pb-2 overflow-x-visible overflow-y-clip">
-        <div class="flex flex-col justify-stretch">
-            <MarginInput getMargins={getMargins} setMargins={setMargins} /> 
+        <div class="flex flex-col">
             <ThresholdsInput getThreshold={getThreshold} setThreshold={setThreshold} />
+            <MarginInput getMargins={getMargins} setMargins={setMargins} /> 
+            <Key />
         </div> 
         <div>
           <Result getThreshold={getThreshold} getMargins={getMargins} /> 
