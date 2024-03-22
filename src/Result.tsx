@@ -1,7 +1,9 @@
 import { Accessor, For, createEffect, createMemo, createSignal, untrack } from "solid-js"
 import { MarginType } from "./types"
 
-const isGray = (threshold: number, mb: number) => (threshold * 500) - mb > 500
+const isGray = (threshold: number, mb: number, mt: number, isTop: boolean) => {
+    return (threshold * 500) + (-(isTop ? mt : mb)) > (500 - (-(isTop ? mb : mt)))
+}
 
 function Result({ 
     getThreshold,
@@ -58,22 +60,19 @@ function Result({
     const mb = createMemo(() => getMargins()[lastIndex()].margin)
     const mt = createMemo(() => getMargins()[0].margin)
 
-    const bottomPositiveHeight = createMemo(() => {
-        console.log(mb())
-        if (mb() > 0)
-            return getMargins()[0].unit == 'px'
-            ? mb()
-            : mb() * 5
+    const height = (isNegative: boolean, m: Accessor<number>) => createMemo(() => {
+        if (isNegative ? m() < 0 : mb() > 0)
+        return getMargins()[0].unit == 'px'
+            ? Math.abs(m())
+            : Math.abs(m()) * 5
         return 0
     })
-
-    const bottomNegativeHeight = createMemo(() => {
-        if (mb() < 0)
-            return getMargins()[lastIndex()].unit == 'px'
-            ? -mb()
-            : (-mb()) * 5
-        return 0            
-    })
+    const bottomPositiveHeight = height(false, mb)
+    const bottomNegativeHeight = height(true, mb)
+    const bottomHeight = () => bottomNegativeHeight() || bottomPositiveHeight()
+    const topPositiveHeight = height(false, mt)
+    const topNegativeHeight = height(true, mt)
+    const topHeight = () => topNegativeHeight() || topPositiveHeight()
 
     return (
         <div>
@@ -88,47 +87,54 @@ function Result({
                     class="w-[500px] h-[500px] z-10 pointer-events-none relative">
                     <div
                         id="bottom-thresholds"
-                        class="absolute w-full min-h-full" 
+                        class="absolute w-full" 
                         classList={{
-                            "top-[500px]": getIsHalfway()
+                            "top-[500px]": getIsHalfway(),
+                            "bottom-0": mb() < 0 && !getIsHalfway(),
+                            "top-0": mb() > 0 && !getIsHalfway()
                         }}>
-                        <div class="w-full absolute" classList={{
-                            "bottom-0": mb() < 0
-                        }}>
-                            <div id="bottom-positive-margin" class="w-full bg-pink-400 bg-opacity-20" style={`height: ${bottomPositiveHeight()}px`}></div>
-                            <div class="w-full h-[500px] relative">
-                                <For each={thresholds()}>{(t, i) => 
+                        <div id="bottom-positive-margin" class="w-full bg-pink-400 bg-opacity-20 absolute top-0" style={`height: ${bottomPositiveHeight()}px`}></div>
+                        <div class="w-full h-[500px] relative">
+                            <For each={thresholds()}>{(t, i) => 
+                                <div 
+                                    class="absolute w-full border border-dashed border-blue-600 text-blue-600" 
+                                    style={`bottom: ${(t*100)+((mb() < 0 ? 1 : -1) * bottomHeight()/5)}%; 
+                                    ${isGray(t, mb(), mt(), false) ? 'border-color: grey;' : ''}`}>
                                     <div 
-                                        class="absolute w-full border border-dashed border-blue-600" 
-                                        style={`bottom: ${t*100}%;`}>
-                                        <div 
-                                            class="absolute font-mono"
-                                            style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
-                                            {t}
-                                        </div>
+                                        class="absolute font-mono"
+                                        style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
+                                        {t}
                                     </div>
-                                }</For>    
-                            </div>
-                            <div id="bottom-negative-margin" class="w-full bg-purple-400 bg-opacity-20" style={`height: ${bottomNegativeHeight()}px`}></div>    
+                                </div>
+                            }</For>    
                         </div>
+                        <div id="bottom-negative-margin" class="w-full bg-purple-400 bg-opacity-20 absolute bottom-0" style={`height: ${bottomNegativeHeight()}px`}></div>    
                     </div>
                     <div
                         id="top-thresholds"
-                        class="absolute w-full min-h-full" 
+                        class="absolute w-full" 
                         classList={{
-                            "bottom-[500px]": !getIsHalfway()
+                            "bottom-[500px]": !getIsHalfway(),
+                            "bottom-0": mt() > 0 && getIsHalfway(),
+                            "top-0": mt() < 0 && getIsHalfway(),
+
                         }}>
-                        <For each={thresholds()}>{(t, i) => 
-                                <div 
-                                    class="absolute w-full border border-dashed border-red-600" 
-                                    style={`top: ${t*100}%;`}>
-                                <div 
-                                    class="absolute font-mono"
-                                    style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
-                                    {t}
+                        <div id="top-negative-margin" class="w-full bg-purple-400 bg-opacity-20 absolute top-0" style={`height: ${topNegativeHeight()}px`}></div>
+                        <div class="w-full h-[500px] relative">
+                            <For each={thresholds()}>{(t, i) => 
+                                    <div 
+                                        class="absolute w-full border border-dashed border-red-600 text-red-600" 
+                                        style={`top: ${(t*100)+((mt() < 0 ? 1 : -1) * topHeight()/5)}%;
+                                        ${isGray(t, mb(), mt(), true) ? 'border-color: grey;' : ''}`}>
+                                    <div 
+                                        class="absolute font-mono"
+                                        style={`${i() % 2 == 0 ? "right" : "left"}: 0; transform: translate(${i() % 2 == 0 ? '' : '-'}150%, -50%)`}>
+                                        {t}
+                                    </div>
                                 </div>
-                            </div>
-                        }</For>
+                            }</For>
+                        </div>
+                        <div id="top-positive-margin" class="w-full bg-pink-400 bg-opacity-20 absolute bottom-0" style={`height: ${topPositiveHeight()}px`}></div>
                     </div>
                 </div>
                 <div 
