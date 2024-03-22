@@ -36,7 +36,7 @@ function Observer(props: {
 )).observe(document.getElementById("box"))`))
 
     return (
-        <div class="flex justify-center my-4">
+        <div class="flex justify-center my-4 relative z-20">
             <code 
                 class="whitespace-pre mb-4 w-min bg-gray-200 p-3 rounded-md" 
                 innerHTML={code().value}>
