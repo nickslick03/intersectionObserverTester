@@ -12,11 +12,11 @@ function App() {
 
   return (
     <>
-      <h1 class="text-3xl font-bold text-center my-4 font-mono">
+      <h1 class="text-3xl font-bold text-center my-6 font-mono">
         Intersection Observer Tester
       </h1>
       <Observer getThreshold={getThreshold} getMargins={getMargins}/>
-      <div class="flex gap-20 justify-center flex-wrap pb-4 overflow-x-visible overflow-y-clip">
+      <div class="flex gap-20 justify-center flex-wrap pb-2 overflow-x-visible overflow-y-clip">
         <div class="flex flex-col justify-stretch">
             <MarginInput getMargins={getMargins} setMargins={setMargins} /> 
             <ThresholdsInput getThreshold={getThreshold} setThreshold={setThreshold} />
