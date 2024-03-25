@@ -1,4 +1,4 @@
-import { Accessor, Setter, Signal } from "solid-js"
+import { Accessor, Setter } from "solid-js"
 
 function formatThresholds(str: string) {
     const strList = str.trim().split(' ')
