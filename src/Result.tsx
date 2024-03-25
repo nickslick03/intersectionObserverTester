@@ -82,7 +82,7 @@ function Result({
             <div 
                 id="result-container"
                 class="self-center w-[500px] h-[500px] relative flex items-center outline outline-black outline-1">
-                <code class="absolute top-0 left-[2px]">#result-container</code>
+                <code class="absolute top-0 left-[2px] text-gray-400">#result-container</code>
                 <div 
                     id="thresholds-container" 
                     class="w-[500px] h-[500px] z-10 pointer-events-none relative">
