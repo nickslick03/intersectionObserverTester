@@ -75,7 +75,7 @@ function Result({
     const topHeight = () => topNegativeHeight() || topPositiveHeight()
 
     return (
-        <div>
+        <div class="overflow-y-clip pb-1">
             <h2 class="font-mono font-bold relative z-20 bg-white mb-[1px]">
                 Result
             </h2>

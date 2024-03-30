@@ -26,7 +26,11 @@ function App() {
         <div>
           <Result getThreshold={getThreshold} getMargins={getMargins} /> 
         </div>
-      </div>      
+      </div>
+      <footer class="text-center mt-8 mb-2 font-mono">
+        <p>Confused? Read this <a href="#" class="text-indigo-900">Article</a>.</p>
+        <p><a href="https://nickslick03.github.io" class="text-indigo-900">Nicholas Epps</a></p>
+      </footer>
     </>
   )
 }
