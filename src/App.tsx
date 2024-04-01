@@ -28,7 +28,7 @@ function App() {
         </div>
       </div>
       <footer class="text-center mt-8 mb-2 font-mono">
-        <p>Confused? Read this <a href="#" class="text-indigo-900">Article</a>.</p>
+        <p>Confused? Read this <a href="https://medium.com/@nicholasepps03/intersection-observer-api-demystified-with-an-online-tool-8cf328e9938a" class="text-indigo-900">Article</a>.</p>
         <p><a href="https://nickslick03.github.io" class="text-indigo-900">Nicholas Epps</a></p>
       </footer>
     </>

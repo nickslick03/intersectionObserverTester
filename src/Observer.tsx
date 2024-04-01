@@ -31,7 +31,7 @@ function Observer(props: {
     {
         rootMargin: "${margins()}",
         thresholds: ${threshold()}
-        rootElement: document.getElementById("root-container")
+        root: document.getElementById("root-container")
     }
 )).observe(document.getElementById("box"))`))
 
