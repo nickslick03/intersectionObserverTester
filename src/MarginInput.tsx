@@ -53,7 +53,7 @@ function MarginInput(props: {
                                 <input 
                                     type="number"
                                     id={label}
-                                    class="w-14 outline-none"
+                                    class="w-14 outline-none pl-1"
                                     value={props.getMargins()[i()].margin}
                                     onchange={(e) => updateMargin(e.target.value, i())} />
                                 <select 

@@ -22,7 +22,7 @@ function ThresholdsInput(props: {
     return (
         <div class="w-[250px]">
             <h2 class="font-bold font-mono">
-                Thresholds
+                threshold
             </h2>
             <textarea 
                 name="thresholds" 
