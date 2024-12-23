@@ -29,9 +29,9 @@ function Observer(props: {
         console.log({percent, isTop, isIntersecting, entry: e[0]})
     },
     {
+        threshold: ${threshold()}
         rootMargin: "${margins()}",
-        thresholds: ${threshold()}
-        root: document.getElementById("root-container")
+        rootElement: document.getElementById("root-container")
     }
 )).observe(document.getElementById("box"))`))
 
